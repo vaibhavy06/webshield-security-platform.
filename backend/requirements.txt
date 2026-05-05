@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+requests
+beautifulsoup4
+python-nmap
+zapv2
+celery
+redis
+sqlalchemy
+psycopg2-binary
+python-dotenv
+httpx
+python-whois
+pyopenssl

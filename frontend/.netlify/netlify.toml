@@ -1,0 +1,55 @@
+redirectsOrigin = "config"
+plugins = []
+functionsDirectory = "C:\\Users\\Vaibhav yadav\\hexatron\\webshield-frontend\\functions"
+functionsDirectoryOrigin = "config"
+headers = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "C:\\Users\\Vaibhav yadav\\hexatron\\webshield-frontend\\dist"
+publishOrigin = "config"
+commandOrigin = "config"
+base = "C:\\Users\\Vaibhav yadav\\hexatron\\webshield-frontend"
+command = "npm run build"
+functions = "C:\\Users\\Vaibhav yadav\\hexatron\\webshield-frontend\\functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/main/:splat"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
