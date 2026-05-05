@@ -1,14 +1,11 @@
 [build]
-  command = "npm run build"
   publish = "dist"
-
-[functions]
-  directory = "functions"
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/main/:splat"
+  to = "https://webshield-security-platform.vercel.app/api/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
