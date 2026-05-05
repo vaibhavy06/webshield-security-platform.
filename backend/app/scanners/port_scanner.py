@@ -42,27 +42,37 @@ class PortScanner(BaseScanner):
             except Exception:
                 pass # Fallback to socket scan
 
-        # Fallback: Native Python Socket Scan
+        # Fallback: Async Socket Scan
         open_ports = []
         common_ports = {21: 'ftp', 22: 'ssh', 80: 'http', 443: 'https'}
         
-        for port, name in common_ports.items():
+        import asyncio
+        async def check_port(port, name):
             try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(1.5)
-                    result = s.connect_ex((hostname, port))
-                    if result == 0:
-                        open_ports.append({
-                            "port": port,
-                            "name": name,
-                            "state": "open",
-                            "method": "socket"
-                        })
-            except:
-                continue
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(hostname, port), 
+                    timeout=0.5
+                )
+                writer.close()
+                try:
+                    await writer.wait_closed()
+                except Exception:
+                    pass
+                return {
+                    "port": port,
+                    "name": name,
+                    "state": "open",
+                    "method": "socket"
+                }
+            except Exception:
+                return None
+
+        tasks = [check_port(port, name) for port, name in common_ports.items()]
+        results = await asyncio.gather(*tasks)
+        open_ports = [r for r in results if r is not None]
 
         return {
             "status": "success",
             "open_ports": open_ports,
-            "message": "Used fallback socket scanner" if not NMAP_AVAILABLE else "Scan completed"
+            "message": "Used fallback async socket scanner" if not NMAP_AVAILABLE else "Scan completed"
         }
