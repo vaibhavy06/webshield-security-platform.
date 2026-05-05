@@ -1,4 +1,5 @@
 [build]
+  command = "echo 'Skipping build since dist is provided'"
   publish = "dist"
 
 [[redirects]]
