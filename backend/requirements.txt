@@ -5,7 +5,7 @@ pydantic-settings
 requests
 beautifulsoup4
 python-nmap
-zapv2
+zaproxy
 celery
 redis
 sqlalchemy
