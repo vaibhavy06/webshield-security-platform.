@@ -19,26 +19,39 @@ class SSLScanner(BaseScanner):
             return self.handle_error(ValueError("Invalid hostname"))
 
         try:
+            import asyncio
             context = ssl.create_default_context()
-            with socket.create_connection((hostname, port), timeout=5) as sock:
-                with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-                    cert = ssock.getpeercert()
-                    
-                    # Parse dates
-                    not_after_str = cert.get('notAfter')
-                    expiry_date = datetime.strptime(not_after_str, '%b %d %H:%M:%S %Y %Z')
-                    remaining_days = (expiry_date - datetime.utcnow()).days
-                    
-                    issuer = dict(x[0] for x in cert.get('issuer', ()))
-                    common_name = issuer.get('commonName', 'Unknown')
+            
+            # Using asyncio.open_connection to make it fully non-blocking
+            reader, writer = await asyncio.wait_for(
+                asyncio.open_connection(hostname, port, ssl=context, server_hostname=hostname),
+                timeout=5.0
+            )
+            
+            ssock = writer.get_extra_info('ssl_object')
+            cert = ssock.getpeercert()
+            
+            writer.close()
+            try:
+                await writer.wait_closed()
+            except Exception:
+                pass
+                
+            # Parse dates
+            not_after_str = cert.get('notAfter')
+            expiry_date = datetime.strptime(not_after_str, '%b %d %H:%M:%S %Y %Z')
+            remaining_days = (expiry_date - datetime.utcnow()).days
+            
+            issuer = dict(x[0] for x in cert.get('issuer', ()))
+            common_name = issuer.get('commonName', 'Unknown')
 
-                    return {
-                        "status": "success",
-                        "valid": True,
-                        "expires_in_days": remaining_days,
-                        "issuer": common_name,
-                        "version": ssock.version()
-                    }
+            return {
+                "status": "success",
+                "valid": True,
+                "expires_in_days": remaining_days,
+                "issuer": common_name,
+                "version": ssock.version()
+            }
         except Exception as e:
             return {
                 "status": "success", # We return success but with valid: False for risk calculation
